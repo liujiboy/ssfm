@@ -140,6 +140,8 @@ void Cloud::saveCloudPointsToPly(const vector<Mat>&images,const char* fileName)
     for(int i=0;i<cloudPoints.size();i++)
     {
         const CloudPoint& cp=cloudPoints[i];
+        if(cp.known)
+        {
         out<<cp.x<<" "<<cp.y<<" "<<cp.z<<" ";
         for(int frame=0;frame<cp.nframes;frame++)
         {
@@ -150,6 +152,7 @@ void Cloud::saveCloudPointsToPly(const vector<Mat>&images,const char* fileName)
                 out<<(int)color[2]<<" "<<(int)color[1]<<" "<<(int)color[0]<<endl;
                 break;
             }
+        }
         }
     }
     out.close();
@@ -256,7 +259,7 @@ void Cloud::filter(int frame,const vector<int>& knowFramevec,const Mat&cameraMat
     cout<<"视图"<<frame<<"平均误差是"<<avgError<<endl;
     vector<bool> mask(objectPoints.size(),false);
     for (int i=0; i<errors.size(); i++) {
-        if(errors[i]>avgError)
+        if(errors[i]>2*avgError)
             mask[i]=true;
     }
     for (int i=0; i<idxvec.size(); i++) {
@@ -302,7 +305,7 @@ void Cloud::deleteOutliers()
     center.x/=count;
     center.y/=count;
     center.z/=count;
-    vector<int> distances(cloudPoints.size(),0);
+    vector<double> distances(cloudPoints.size(),0);
     double avgdistance=0;
     for(int i=0;i<cloudPoints.size();i++)
     {
@@ -323,7 +326,7 @@ void Cloud::deleteOutliers()
         CloudPoint&cp =cloudPoints[i];
         if(cp.known)
         {
-            if(distances[i]>avgdistance)
+            if(distances[i]>2*avgdistance)
                 mask[i]=true;
         }else{
             mask[i]=true;
@@ -371,6 +374,7 @@ int Cloud:: chooseNextFrame(const vector<int>&knowFramevec,int nframes)
                     count++;
                 }
             }
+            cout<<"视图"<<frame<<"已知点数为"<<count<<endl;
             if (count>maxCount) {
                 maxCount=count;
                 nextFrame=frame;

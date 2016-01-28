@@ -137,8 +137,10 @@ static void img_projsRTS_jac_x(double *p, struct sba_crsm *idxij, int *rcidxs, i
 
 void SFM::computeFeatures(const vector<Mat>&images)
 {
-    SIFT sift(0, 3, 0.01, 100, 1.6);
+    SIFT sift(0, 3, 0.001, 200, 1);
     //SIFT sift;
+    
+    
     for(vector<Mat>::const_iterator it=images.begin();it!=images.end();it++)
     {
         vector<KeyPoint> kp;
